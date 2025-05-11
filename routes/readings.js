@@ -22,8 +22,10 @@ router.get('/', (req, res) => {
   db.all(query, [userId], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
 
+    const sanitizedRows = rows.map(({ user_id, ...rest }) => rest);
+
     // Group data by year using the 'date' field
-    const groupedData = rows.reduce((acc, row) => {
+    const groupedData = sanitizedRows.reduce((acc, row) => {
       const year = new Date(row.date).getFullYear(); // Use 'date' field for year
       if (!acc[year]) {
         acc[year] = [];
