@@ -1,3 +1,5 @@
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('database.sqlite');
+const { Database } = require('@sqlitecloud/drivers');
+
+const db = new Database(process.env.DB_CONNECTION_STRING);
+
 module.exports = db;
