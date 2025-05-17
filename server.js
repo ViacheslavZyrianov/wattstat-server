@@ -11,7 +11,7 @@ const cookieParser = require('cookie-parser');
 const authorizeOwnership = require('./middleware/authorizeOwnership');
 
 const app = express();
-const PORT = 3000;
+const PORT = 3001;
 
 app.use(cookieParser());
 
