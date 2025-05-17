@@ -13,6 +13,7 @@
   "description": "",
   "dependencies": {
     "@sqlitecloud/drivers": "^1.0.438",
+    "connect-sqlite3": "^0.9.15",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
