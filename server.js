@@ -11,7 +11,7 @@ const cookieParser = require('cookie-parser');
 const authorizeOwnership = require('./middleware/authorizeOwnership');
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 app.use(cookieParser());
 
@@ -100,5 +100,5 @@ fs.readdirSync(routesPath).forEach((file) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server running on ${process.env.SERVER_URL}, on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
