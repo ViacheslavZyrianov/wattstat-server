@@ -6,6 +6,7 @@ const verifySession = require('./middleware/verifySession');
 const fs = require('fs');
 const path = require('path');
 const passport = require('passport');
+const SQLiteStore = require('connect-sqlite3')(session);
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const cookieParser = require('cookie-parser');
 const authorizeOwnership = require('./middleware/authorizeOwnership');
@@ -24,6 +25,22 @@ app.use(
 );
 
 app.use(express.json());
+
+app.use(
+  session({
+    store: new (SQLiteStore(session))({
+      db: 'sessions.sqlite', // optional filename
+      dir: './db', // optional directory
+    }),
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false, // true if using HTTPS
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
+    },
+  })
+);
 
 app.use(
   session({
