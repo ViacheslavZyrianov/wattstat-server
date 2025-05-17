@@ -28,16 +28,16 @@ app.use(express.json());
 
 app.use(
   session({
-    store: new (SQLiteStore(session))({
-      db: 'sessions.sqlite', // optional filename
-      dir: './db', // optional directory
+    store: new SQLiteStore({
+      db: 'sessions.sqlite',
+      dir: './db',
     }),
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // true if using HTTPS
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
+      secure: false,
+      maxAge: 1000 * 60 * 60 * 24,
     },
   })
 );
