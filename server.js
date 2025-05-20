@@ -9,9 +9,10 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const cookieParser = require('cookie-parser');
 const authorizeOwnership = require('./middleware/authorizeOwnership');
+const { checkDatabaseConnection } = require('./db/connection');
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || '3001';
 
 app.use(cookieParser());
 
@@ -32,8 +33,9 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+      secure: process.env.NODE_ENV === 'production',
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      sameSite: 'lax', // Add this line
     },
   })
 );
@@ -99,6 +101,8 @@ fs.readdirSync(routesPath).forEach((file) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`Server running on ${process.env.SERVER_URL}, on port ${PORT}`);
+app.listen(PORT, async () => {
+  console.log(`Server running on port ${PORT}`);
+
+  await checkDatabaseConnection();
 });

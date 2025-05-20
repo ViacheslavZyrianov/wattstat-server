@@ -1,32 +1,32 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db');
+const { readingQueries } = require('../db/queries');
 
 // POST /readings
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const { day, night, date } = req.body;
   const userId = req.user.id;
 
-  const query = `INSERT INTO readings (day, night, user_id, date) VALUES (?, ?, ?, ?)`;
-  db.run(query, [day, night, userId, date], (err) => {
-    if (err) return res.status(500).json({ error: err.message });
+  try {
+    await readingQueries.create(day, night, userId, date);
     res.sendStatus(201);
-  });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // GET /readings
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const userId = req.user.id;
 
-  const query = `SELECT * FROM readings WHERE user_id = ? ORDER BY date DESC`; // Order by 'date' instead of 'created_at'
-  db.all(query, [userId], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-
+  try {
+    const rows = await readingQueries.findByUserId(userId);
     const sanitizedRows = rows.map(({ user_id, ...rest }) => rest);
 
     // Group data by year using the 'date' field
     const groupedData = sanitizedRows.reduce((acc, row) => {
-      const year = new Date(row.date).getFullYear(); // Use 'date' field for year
+      const year = new Date(row.date).getFullYear();
       if (!acc[year]) {
         acc[year] = [];
       }
@@ -35,53 +35,40 @@ router.get('/', (req, res) => {
     }, {});
 
     res.json(groupedData);
-  });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // PATCH /readings/:id
-router.patch('/:id', (req, res) => {
+router.patch('/:id', async (req, res) => {
   const { id } = req.params;
   const { day, night, date } = req.body;
 
-  const fields = [];
-  const values = [];
-
-  if (day) {
-    fields.push('day = ?');
-    values.push(day);
-  }
-
-  if (night) {
-    fields.push('night = ?');
-    values.push(night);
-  }
-
-  if (date) {
-    fields.push('date = ?');
-    values.push(date);
-  }
-
-  if (fields.length === 0) {
-    return res.status(400).json({ error: 'Nothing to update' });
-  }
-
-  values.push(id);
-
-  const sql = `UPDATE readings SET ${fields.join(', ')} WHERE id = ?`;
-  db.run(sql, values, function (err) {
-    if (err) return res.status(500).json({ error: err.message });
+  try {
+    await readingQueries.update(id, { day, night, date });
     res.json({ updated: true, id });
-  });
+  } catch (err) {
+    console.error(err);
+    if (err.message === 'Nothing to update') {
+      return res.status(400).json({ error: err.message });
+    }
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // DELETE /readings/:id
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   const { id } = req.params;
 
-  db.run('DELETE FROM readings WHERE id = ?', [id], function (err) {
-    if (err) return res.status(500).json({ error: err.message });
+  try {
+    await readingQueries.delete(id);
     res.json({ deleted: true, id });
-  });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;

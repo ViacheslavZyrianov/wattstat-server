@@ -125,10 +125,10 @@ router.post('/google/verify-token', async (req, res) => {
 
 // Check authentication status
 router.get('/status', (req, res) => {
-  if (req.isAuthenticated()) {
+  if (req.isAuthenticated() && req.session.passport?.user) {
     return res.json({
       authenticated: true,
-      user: req.user,
+      user: req.session.passport.user,
     });
   }
   return res.json({ authenticated: false });
@@ -136,10 +136,13 @@ router.get('/status', (req, res) => {
 
 // Logout route
 router.post('/logout', (req, res) => {
-  req.logout((err) => {
+  // Clear the session
+  req.session.destroy((err) => {
     if (err) {
       return res.status(500).json({ error: 'Logout failed' });
     }
+    // Clear the cookie
+    res.clearCookie('connect.sid');
     res.json({ success: true });
   });
 });

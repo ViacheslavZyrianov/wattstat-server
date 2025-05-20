@@ -1,25 +1,34 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db');
+const { userQueries } = require('../db/queries');
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const { id } = req.query;
 
-  if (id) {
-    db.get('SELECT * FROM users WHERE id = ?', [id], (err, row) => {
-      if (err) return res.status(500).json({ error: err.message });
-      if (!row) return res.status(404).json({ error: 'User not found' });
-      res.json(row);
-    });
-  } else return res.status(500).json({ error: 'No ID provided' });
+  if (!id) {
+    return res.status(500).json({ error: 'No ID provided' });
+  }
+
+  try {
+    const user = await userQueries.findById(id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const { id } = req.body;
-  db.run('INSERT INTO users (id) VALUES (?)', [id], function (err) {
-    if (err) return res.status(500).json({ error: err.message });
+
+  try {
+    await userQueries.create(id);
     res.sendStatus(201);
-  });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
