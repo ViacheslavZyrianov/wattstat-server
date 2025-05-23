@@ -57,6 +57,7 @@ passport.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: '/api/auth/google/callback',
       scope: ['profile', 'email'],
+      passReqToCallback: true,
     },
     (accessToken, refreshToken, profile, done) => {
       // Create user object from profile data
