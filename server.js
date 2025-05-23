@@ -59,9 +59,8 @@ passport.use(
       scope: ['profile', 'email'],
       passReqToCallback: true,
     },
-    (accessToken, refreshToken, profile, done) => {
-      // Create user object from profile data
-      const user = {
+    (req, accessToken, refreshToken, profile, done) => {
+      return done(null, {
         id: profile.id,
         displayName: profile.displayName,
         firstName: profile.name?.givenName,
@@ -69,8 +68,7 @@ passport.use(
         email: profile.emails?.[0]?.value,
         avatar: profile.photos?.[0]?.value,
         accessToken,
-      };
-      return done(null, user);
+      });
     }
   )
 );
