@@ -36,7 +36,7 @@ async function create({ id, email, name, picture, provider }) {
  * @returns {Promise<void>}
  */
 async function updateLastLogin(id) {
-  await executeQuery('UPDATE users SET last_login = NOW() WHERE id = ?', [id]);
+  await executeQuery('UPDATE users SET last_login = ? WHERE id = ?', [new Date(), id]);
 }
 
 /**
