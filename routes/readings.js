@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { readingQueries } = require('../db/queries');
+const authenticateToken = require('../middleware/auth');
 
 // POST /readings
-router.post('/', async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
   const { day, night, date } = req.body;
   const userId = req.user.id;
 
@@ -17,7 +18,7 @@ router.post('/', async (req, res) => {
 });
 
 // GET /readings
-router.get('/', async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
   const userId = req.user.id;
 
   try {
@@ -42,7 +43,7 @@ router.get('/', async (req, res) => {
 });
 
 // PATCH /readings/:id
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { day, night, date } = req.body;
 
@@ -59,7 +60,7 @@ router.patch('/:id', async (req, res) => {
 });
 
 // DELETE /readings/:id
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
 
   try {
