@@ -31,15 +31,6 @@ async function create({ id, email, name, picture, provider }) {
 }
 
 /**
- * Update last_login timestamp
- * @param {string} id - User ID
- * @returns {Promise<void>}
- */
-async function updateLastLogin(id) {
-  await executeQuery('UPDATE users SET last_login = ? WHERE id = ?', [new Date(), id]);
-}
-
-/**
  * Find a user by ID or create them if they don't exist
  * @param {Object} user - User info from Google token
  * @returns {Promise<Object>} User object
@@ -49,8 +40,6 @@ async function findByIdOrCreate(user) {
   if (!existingUser) {
     await create(user);
     existingUser = await findById(user.id);
-  } else {
-    await updateLastLogin(user.id);
   }
   return existingUser;
 }
@@ -58,6 +47,5 @@ async function findByIdOrCreate(user) {
 module.exports = {
   findById,
   create,
-  updateLastLogin,
   findByIdOrCreate,
 };
