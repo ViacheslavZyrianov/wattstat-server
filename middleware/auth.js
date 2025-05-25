@@ -1,6 +1,11 @@
 const jwt = require('jsonwebtoken');
 
 function authenticateToken(req, res, next) {
+  // Skip token verification for auth routes
+  if (req.path.startsWith('/auth/')) {
+    return next();
+  }
+
   const token = req.headers['authorization']?.split(' ')[1]; // Get the token after "Bearer"
 
   if (!token) return res.status(401).json({ error: 'Token required' });
