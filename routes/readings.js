@@ -23,7 +23,11 @@ router.get('/', authenticateToken, async (req, res) => {
 
   try {
     const rows = await readingQueries.findByUserId(userId);
-    const sanitizedRows = rows.map(({ user_id, ...rest }) => rest);
+    const sanitizedRows = rows.map((row) => {
+      // eslint-disable-next-line no-unused-vars
+      const { user_id, ...rest } = row;
+      return rest;
+    });
 
     // Group data by year using the 'date' field
     const groupedData = sanitizedRows.reduce((acc, row) => {
