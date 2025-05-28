@@ -47,9 +47,38 @@ fs.readdirSync(routesPath).forEach((file) => {
   }
 });
 
+const connectToDB = async () => {
+  let connected = false;
+  let attempts = 0;
+  const maxAttempts = 10;
+  const retryDelay = 5000; // 5 seconds delay between attempts
+
+  while (!connected && attempts < maxAttempts) {
+    try {
+      connected = await checkDatabaseConnection();
+      if (!connected) {
+        attempts++;
+        console.log(`Database connection attempt ${attempts}/${maxAttempts} failed. Retrying in 5 seconds...`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+      }
+    } catch (error) {
+      attempts++;
+      console.error(`Database connection error (attempt ${attempts}/${maxAttempts}):`, error.message);
+      await new Promise(resolve => setTimeout(resolve, retryDelay));
+    }
+  }
+
+  if (!connected) {
+    console.error('Failed to connect to database after maximum attempts. Server may not function properly.');
+  } else {
+    console.log('Successfully connected to database');
+  }
+}
+
+
 // Start server
 app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
 
-  await checkDatabaseConnection();
+  await connectToDB();
 });
