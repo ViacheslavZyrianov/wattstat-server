@@ -13,12 +13,22 @@ const PORT = process.env.PORT || '3001';
 app.use(cookieParser());
 
 // CORS config
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL,
-    credentials: true,
-  })
-);
+// For development (allows all origins explicitly)
+const allowedOrigins = [process.env.CLIENT_URL_NGROK, process.env.CLIENT_URL]; // replace with actual
+
+app.use(cors({
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 
 app.use(express.json());
 
@@ -31,11 +41,14 @@ app.use(
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Use 'none' for cross-origin requests in production
+      sameSite: 'none'
+      //sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Use 'none' for cross-origin requests in production
     },
     proxy: process.env.NODE_ENV === 'production', // Trust the reverse proxy in production
   })
 );
+
+app.set('trust proxy', 1)
 
 const routesPath = path.join(__dirname, 'routes');
 fs.readdirSync(routesPath).forEach((file) => {
