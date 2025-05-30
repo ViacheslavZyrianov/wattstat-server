@@ -68,7 +68,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
 
   try {
-    await readingQueries.delete(id);
+    await readingQueries.remove(id);
     res.json({ deleted: true, id });
   } catch (err) {
     console.error(err);
