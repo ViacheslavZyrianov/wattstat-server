@@ -16,19 +16,20 @@ app.use(cookieParser());
 // For development (allows all origins explicitly)
 const allowedOrigins = [process.env.CLIENT_URL_NGROK, process.env.CLIENT_URL]; // replace with actual
 
-app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 
 app.use(express.json());
 
@@ -41,14 +42,14 @@ app.use(
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      sameSite: 'none'
+      sameSite: 'none',
       //sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Use 'none' for cross-origin requests in production
     },
     proxy: process.env.NODE_ENV === 'production', // Trust the reverse proxy in production
   })
 );
 
-app.set('trust proxy', 1)
+app.set('trust proxy', 1);
 
 const routesPath = path.join(__dirname, 'routes');
 fs.readdirSync(routesPath).forEach((file) => {
@@ -71,23 +72,29 @@ const connectToDB = async () => {
       connected = await checkDatabaseConnection();
       if (!connected) {
         attempts++;
-        console.log(`Database connection attempt ${attempts}/${maxAttempts} failed. Retrying in 5 seconds...`);
-        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        console.log(
+          `Database connection attempt ${attempts}/${maxAttempts} failed. Retrying in 5 seconds...`
+        );
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
       }
     } catch (error) {
       attempts++;
-      console.error(`Database connection error (attempt ${attempts}/${maxAttempts}):`, error.message);
-      await new Promise(resolve => setTimeout(resolve, retryDelay));
+      console.error(
+        `Database connection error (attempt ${attempts}/${maxAttempts}):`,
+        error.message
+      );
+      await new Promise((resolve) => setTimeout(resolve, retryDelay));
     }
   }
 
   if (!connected) {
-    console.error('Failed to connect to database after maximum attempts. Server may not function properly.');
+    console.error(
+      'Failed to connect to database after maximum attempts. Server may not function properly.'
+    );
   } else {
     console.log('Successfully connected to database');
   }
-}
-
+};
 
 // Start server
 app.listen(PORT, async () => {
